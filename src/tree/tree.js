@@ -1,52 +1,53 @@
 const assert = require("assert");
 
-const Node = (left = null, operator = "",  right = null) => {
-  const result = () => {
-    switch (operator) {
-      case "+":
-        return left.result() + right.result();
-      case "-":
-        return left.result() - right.result();
-      case "x":
-        return left.result() * right.result();
-      case "÷":
-        return left.result() / right.result();
-      default:
-        return left;
+const SIGNS = { PLUS: '+', MINUS: '-', MULTIPLY: 'x', DIVIDE: '÷' }
+
+class Node {
+  constructor(left, operator, right, parent) {
+    this.left = left;
+    this.operator = operator;
+    this.right = right;
+    this.parent = parent;
+  }
+
+  add(right) {
+    return new Node(this.left + right, SIGNS.PLUS, right, this);
+  }
+
+  minus(right) {
+    return new Node(this.left - right,  SIGNS.MINUS, right, this);
+  }
+
+  multiply(right) {
+    return new Node(this.left * right,  SIGNS.MULTIPLY, right, this);
+  }
+
+  divide(right) {
+    return new Node(this.left / right,  SIGNS.DIVIDE, right, this);
+  }
+
+  toString() {
+    if (!this.operator) {
+      return this.left.toString();
     }
-  };
 
-  const toString = () => {
-    if (!operator) {
-      return left.toString();
-    }
+    const left = this.parent || this.left;
 
-    return `(${left.toString()} ${operator} ${right.toString()})`;
-  };
+    return `(${left.toString()} ${this.operator} ${this.right.toString()})`;
+  }
 
-  return {
-    operator,
-    left,
-    right,
-    result,
-    toString
-  };
-};
+  result () {
+    return this.left;
+  }
 
-const index = Node(
-  Node(
-    Node(7),
-    "+",
-    Node(
-      Node(Node(3),"-",  Node(2)),
-      "x",
-      Node(5)
-    )
-  ),
-  "÷",
-  Node(6)
-);
+  valueOf () {
+    return this.left;
+  }
+}
 
+const index = new Node(7).add(
+  new Node(3).minus(2).multiply(5)
+).divide(6)
 
 assert.strictEqual("((7 + ((3 - 2) x 5)) ÷ 6)", index.toString());
 assert.strictEqual(2, index.result());
